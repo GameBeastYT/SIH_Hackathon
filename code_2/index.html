@@ -1,0 +1,100 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Indian Penal Code Assistant</title> 
+    <link rel="stylesheet" href="style.css"> 
+</head> 
+<body> 
+    <div class="container"> 
+        <h1> 
+            <div class="icon"> 
+                <img src="C:\Users\bakab\HACKATHON\code_2\mpolice_logo.jpeg" height="80px"> 
+            </div> 
+            Indian Penal Code Assistant
+        </h1> 
+        <form id="keywordForm"> 
+            <label for="keywordInput">Enter a Complaint or Keyword:</label> 
+            <!-- Input Container for Textarea and Mic Icon -->
+            <div class="input-container">
+                <textarea id="keywordInput" rows="5" placeholder="e.g., There was a robbery in the neighborhood..."></textarea>
+                <!-- Microphone Icon -->
+                <img src="C:\Users\bakab\HACKATHON\code_2\voiceicon.jpg" id="micIcon" alt="Mic">
+            </div>
+            <small id="micStatus" style="display:none;">Mic is on</small> <!-- Mic status text -->
+            <button type="submit">Check Punishment</button> 
+        </form> 
+        <div id="result"></div> 
+    </div> 
+
+    <!-- Speech Recognition Script -->
+    <script>
+    const resultText = document.getElementById("resultText"); 
+    const micIcon = document.getElementById("micIcon"); 
+    const keywordInput = document.getElementById("keywordInput"); 
+    const micStatus = document.getElementById("micStatus"); // Status text element
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; 
+    const speechRecognition = new SpeechRecognition(); 
+    let isListening = false; // State to track whether the mic is on
+
+    // Continuous speech mode to allow multiple sentences to be spoken
+    speechRecognition.continuous = true; 
+    speechRecognition.interimResults = true; // Allow partial results (for real-time updates)
+
+    speechRecognition.onresult = function(event) { 
+        let interimTranscript = ''; 
+        let finalTranscript = '';
+
+        for (let i = 0; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript;
+
+            if (event.results[i].isFinal) {
+                finalTranscript += transcript; // Final recognized text
+            } else {
+                interimTranscript += transcript; // Real-time update text
+            }
+        }
+
+        // Update the textarea with both interim and final transcripts
+        keywordInput.value = finalTranscript + interimTranscript; 
+    }; 
+    
+    speechRecognition.onerror = function(event) { 
+        console.error("Speech recognition error", event.error); 
+        toggleMicStatus(false); // Turn off the mic on error
+    };
+
+    // Function to toggle mic status
+    function toggleMicStatus(status) {
+        if (status) {
+            micStatus.style.display = 'block'; // Show mic status
+            micStatus.textContent = 'Mic is on'; // Set the text
+            isListening = true;
+        } else {
+            micStatus.style.display = 'none'; // Hide mic status
+            isListening = false;
+        }
+    }
+
+    // Trigger speech recognition when mic icon is clicked
+    micIcon.addEventListener("click", function() { 
+        if (isListening) {
+            speechRecognition.stop(); // Stop listening if already listening
+            toggleMicStatus(false); // Update the UI to show mic is off
+        } else {
+            speechRecognition.start(); // Start listening
+            toggleMicStatus(true); // Update the UI to show mic is on
+        }
+    });
+
+    speechRecognition.onstart = function() { 
+        console.log("Listening..."); 
+    };
+
+    speechRecognition.onend = function() {
+        toggleMicStatus(false); // Ensure mic status updates when recognition ends
+    }
+    </script> 
+</body> 
+</html>
